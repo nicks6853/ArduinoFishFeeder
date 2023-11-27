@@ -3,6 +3,8 @@
 FishFeeder::FishFeeder() {
     isDisplayOn = true;
     view = NULL;
+    feedingTimes = NULL;
+
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 }
 
@@ -56,12 +58,6 @@ void FishFeeder::run() {
 Adafruit_SSD1306* FishFeeder::getDisplay() { return &display; }
 RTC_DS3231* FishFeeder::getClock() { return &clock; }
 
-uint32_t FishFeeder::getFeedingTime(unsigned int index) {
-    return feedingTimes[index];
-}
-
-void FishFeeder::setFeedingTime(uint32_t feedingTime, unsigned int index) {
-    Serial.printf("Setting feeding time at index %d to value: %d", index,
-                  feedingTime);
-    feedingTimes[index] = feedingTime;
+void FishFeeder::setFeedingTime(uint32_t* feedingTimesPtr) {
+    feedingTimes = feedingTimesPtr;
 }

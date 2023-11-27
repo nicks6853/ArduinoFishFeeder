@@ -16,7 +16,7 @@ class FishFeeder {
     RTC_DS3231 clock;
     View* view;
 
-    uint32_t feedingTimes[2];
+    uint32_t* feedingTimes;
 
     bool isDisplayOn;
 
@@ -30,8 +30,7 @@ class FishFeeder {
     void run();
     void clearView();
     void setView(View* viewPtr);
-    uint32_t getFeedingTime(unsigned int index);
-    void setFeedingTime(uint32_t feedingTime, unsigned int index);
+    void setFeedingTime(uint32_t* feedingTimesPtr);
 };
 
 #endif

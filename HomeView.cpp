@@ -12,7 +12,9 @@ void HomeView::run() {
 void HomeView::handleInputs() {
     int buttonPressed = digitalRead(BUTTON_PIN) == LOW;
     if (buttonPressed) {
-        Serial.println("Button Pressed");
+        // Go to set time view
+        SetTimeView* setTimeView = new SetTimeView(fishFeeder);
+        gotoView = setTimeView;
     }
 }
 
