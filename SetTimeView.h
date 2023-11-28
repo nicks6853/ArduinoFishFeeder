@@ -9,6 +9,7 @@ class SetTimeView : public View {
    private:
     int step;
     uint32_t* feedingTimes;
+    int feedingTimesIndex;
 
    public:
     SetTimeView(FishFeeder* fishFeeder);

@@ -5,6 +5,7 @@
 #include <Adafruit_SSD1306.h>
 #include <Arduino.h>
 #include <RTClib.h>
+#include <RotaryEncoder.h>
 
 #include "Definitions.h"
 #include "View.h"
@@ -15,8 +16,11 @@ class FishFeeder {
     Adafruit_SSD1306 display = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT);
     RTC_DS3231 clock;
     View* view;
+    RotaryEncoder* rotaryEncoder;
+    int rotaryEncoderPos;
+    int rotaryEncoderNewPos;
 
-    uint32_t* feedingTimes;
+    // uint32_t* feedingTimes;
 
     bool isDisplayOn;
 
@@ -30,7 +34,13 @@ class FishFeeder {
     void run();
     void clearView();
     void setView(View* viewPtr);
-    void setFeedingTime(uint32_t* feedingTimesPtr);
+    // void setFeedingTime(uint32_t* feedingTimesPtr);
+    RotaryEncoder* getRotaryEncoder();
+    void setRotaryEncoder(RotaryEncoder* rotaryEncoderPtr);
+    void setRotaryEncoderPos(int pos);
+    void setRotaryEncoderNewPos(int pos);
+    int getRotaryEncoderPos();
+    int getRotaryEncoderNewPos();
 };
 
 #endif

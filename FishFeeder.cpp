@@ -1,9 +1,11 @@
 #include "FishFeeder.h"
 
 FishFeeder::FishFeeder() {
+    rotaryEncoderPos = 0;
+    rotaryEncoder = NULL;
     isDisplayOn = true;
     view = NULL;
-    feedingTimes = NULL;
+    // feedingTimes = NULL;
 
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 }
@@ -58,6 +60,16 @@ void FishFeeder::run() {
 Adafruit_SSD1306* FishFeeder::getDisplay() { return &display; }
 RTC_DS3231* FishFeeder::getClock() { return &clock; }
 
-void FishFeeder::setFeedingTime(uint32_t* feedingTimesPtr) {
-    feedingTimes = feedingTimesPtr;
+// void FishFeeder::setFeedingTime(uint32_t* feedingTimesPtr) {
+//     feedingTimes = feedingTimesPtr;
+// }
+
+RotaryEncoder* FishFeeder::getRotaryEncoder() { return rotaryEncoder; }
+void FishFeeder::setRotaryEncoder(RotaryEncoder* rotaryEncoderPtr) {
+    rotaryEncoder = rotaryEncoderPtr;
 }
+
+void FishFeeder::setRotaryEncoderPos(int pos) { rotaryEncoderPos = pos; }
+void FishFeeder::setRotaryEncoderNewPos(int pos) { rotaryEncoderNewPos = pos; }
+int FishFeeder::getRotaryEncoderPos() { return rotaryEncoderPos; }
+int FishFeeder::getRotaryEncoderNewPos() { return rotaryEncoderNewPos; }

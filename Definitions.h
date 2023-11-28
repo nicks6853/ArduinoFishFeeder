@@ -6,5 +6,4 @@
 // Rotary encoder pins
 #define ROTARY_DT_PIN 13   // D7 on NodeMCU
 #define ROTARY_CLK_PIN 14  // D5 on NodeMCU
-
-// #define ROTARY_SW_PIN 9    // SD2 on NodeMCU
+#define ROTARY_SW_PIN 2    // D4 on NodeMCU
