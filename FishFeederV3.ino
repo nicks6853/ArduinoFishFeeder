@@ -1,6 +1,7 @@
 #include <RotaryEncoder.h>
 
 #include "FishFeeder.h"
+#include "Secrets.h"
 
 FishFeeder fishFeeder;
 RotaryEncoder* encoder = NULL;
