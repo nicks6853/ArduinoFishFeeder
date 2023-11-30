@@ -10,11 +10,11 @@ class FishFeeder;  // Forward declaration
 class View {
    protected:
     View* gotoView;
-
+    bool shouldPause;
     FishFeeder* fishFeeder;
 
    public:
-    View(FishFeeder* fishFeederPtr);
+    View(FishFeeder* fishFeederPtr, bool shouldPause = false);
     View* getGotoView();
 
     /**

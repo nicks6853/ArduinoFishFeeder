@@ -5,9 +5,15 @@ FishFeeder::FishFeeder() {
     rotaryEncoder = NULL;
     isDisplayOn = true;
     view = NULL;
-    // feedingTimes = NULL;
 
-    pinMode(BUTTON_PIN, INPUT_PULLUP);
+    // Initialize feeding times array to all zeros
+    feedingTimes = new int[4];
+    feedingTimes[0] = 0;
+    feedingTimes[1] = 0;
+    feedingTimes[2] = 0;
+    feedingTimes[3] = 0;
+
+    lastFeedingTime = UINT32_MAX;
 }
 
 void FishFeeder::begin() {
@@ -60,10 +66,6 @@ void FishFeeder::run() {
 Adafruit_SSD1306* FishFeeder::getDisplay() { return &display; }
 RTC_DS3231* FishFeeder::getClock() { return &clock; }
 
-// void FishFeeder::setFeedingTime(uint32_t* feedingTimesPtr) {
-//     feedingTimes = feedingTimesPtr;
-// }
-
 RotaryEncoder* FishFeeder::getRotaryEncoder() { return rotaryEncoder; }
 void FishFeeder::setRotaryEncoder(RotaryEncoder* rotaryEncoderPtr) {
     rotaryEncoder = rotaryEncoderPtr;
@@ -73,3 +75,8 @@ void FishFeeder::setRotaryEncoderPos(int pos) { rotaryEncoderPos = pos; }
 void FishFeeder::setRotaryEncoderNewPos(int pos) { rotaryEncoderNewPos = pos; }
 int FishFeeder::getRotaryEncoderPos() { return rotaryEncoderPos; }
 int FishFeeder::getRotaryEncoderNewPos() { return rotaryEncoderNewPos; }
+int* FishFeeder::getFeedingTimes() { return feedingTimes; }
+uint32_t FishFeeder::getLastFeedingTime() { return lastFeedingTime; }
+void FishFeeder::setLastFeedingTime(uint32_t unixtime) {
+    lastFeedingTime = unixtime;
+};

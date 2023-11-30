@@ -8,21 +8,18 @@
 class SetTimeView : public View {
    private:
     int step;
-    uint32_t* feedingTimes;
-    int feedingTimesIndex;
+    int workingIndex;
 
    public:
-    SetTimeView(FishFeeder* fishFeeder);
+    SetTimeView(FishFeeder* fishFeeder, bool shouldPause = false);
+
     void run();
-    void handleInputs();
+    void runDefault();
+
     void draw();
     void drawDefault(Adafruit_SSD1306* display, RTC_DS3231* clock);
-    void drawStep1(Adafruit_SSD1306* display, RTC_DS3231* clock);
-    void drawStep2(Adafruit_SSD1306* display, RTC_DS3231* clock);
+
+    void handleInputs();
     void handleInputsDefault();
-    void handleInputsStep1();
-    void handleInputsStep2();
-    void runStep1();
-    void runStep2();
 };
 #endif

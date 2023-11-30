@@ -7,7 +7,7 @@
 
 class WelcomeView : public View {
    public:
-    WelcomeView(FishFeeder* fishFeeder);
+    WelcomeView(FishFeeder* fishFeeder, bool shouldPause = false);
     void run();
     void handleInputs();
     void draw();

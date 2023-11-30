@@ -2,11 +2,18 @@
 
 #include "FishFeeder.h"
 
-WelcomeView::WelcomeView(FishFeeder* fishFeederPtr) : View(fishFeederPtr) {}
+WelcomeView::WelcomeView(FishFeeder* fishFeederPtr, bool shouldPause)
+    : View(fishFeederPtr, shouldPause) {}
 
 void WelcomeView::run() {
+    draw();  // Draw the fish icon
+
+    if (shouldPause) {
+        delay(250);
+        shouldPause = false;
+    }
+
     handleInputs();  // Nothing to do here
-    draw();          // Draw the fish icon
     delay(2000);
 
     // Continue to home view

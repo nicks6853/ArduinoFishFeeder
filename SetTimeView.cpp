@@ -2,46 +2,37 @@
 
 #include "FishFeeder.h"
 
-SetTimeView::SetTimeView(FishFeeder* fishFeederPtr) : View(fishFeederPtr) {
+SetTimeView::SetTimeView(FishFeeder* fishFeederPtr, bool shouldPause)
+    : View(fishFeederPtr, shouldPause) {
     step = 0;
-
-    feedingTimes = new uint32_t[4];
-    feedingTimes[0] = 0;
-    feedingTimes[1] = 0;
-    feedingTimes[2] = 0;
-    feedingTimes[3] = 0;
-
-    feedingTimesIndex = 0;
-
-    delay(500);
+    workingIndex = 0;
 }
 
 void SetTimeView::run() {
     switch (step) {
-        case 1:
-            runStep1();
-            break;
-        case 2:
-            runStep2();
+        case 0:
+            runDefault();
             break;
         default:
             break;
     }
 
-    draw();          // Draw the fish icon
-    handleInputs();  // Nothing to do here
+    draw();  // Draw to the display
+
+    if (shouldPause) {
+        delay(250);
+        shouldPause = false;
+    }
+
+    handleInputs();  // Handle inputs depending on the screen
 }
 
 void SetTimeView::handleInputs() {
     switch (step) {
-        case 1:
-            handleInputsStep1();
-            break;
-        case 2:
-            handleInputsStep2();
+        case 0:
+            handleInputsDefault();
             break;
         default:
-            handleInputsDefault();
             break;
     }
 }
@@ -51,73 +42,77 @@ void SetTimeView::draw() {
     RTC_DS3231* clock = fishFeeder->getClock();
 
     switch (step) {
-        case 1:
-            drawStep1(display, clock);
-            break;
-        case 2:
-            drawStep2(display, clock);
+        case 0:
+            drawDefault(display, clock);
             break;
         default:
-            drawDefault(display, clock);
             break;
     }
 }
 
 void SetTimeView::drawDefault(Adafruit_SSD1306* display, RTC_DS3231* clock) {
+    int* feedingTimes = fishFeeder->getFeedingTimes();
+
     display->clearDisplay();
     display->setCursor(0, 0);
     display->setTextColor(SSD1306_WHITE, SSD1306_BLACK);
-    display->print("Press button to set time");
-    display->display();
-}
+    display->print("Set Time:");
+    display->setCursor(0, 16);
 
-void SetTimeView::drawStep1(Adafruit_SSD1306* display, RTC_DS3231* clock) {
-    display->clearDisplay();
-    display->setCursor(0, 0);
-    display->setTextColor(SSD1306_WHITE, SSD1306_BLACK);
-    display->print("Set Time 1:");
-    display->setCursor(0, 8);
-
-    display->setTextColor(
-        feedingTimesIndex == 0 ? SSD1306_BLACK : SSD1306_WHITE,
-        feedingTimesIndex == 0 ? SSD1306_WHITE : SSD1306_BLACK);
+    // Print first time
+    display->print("1: ");
+    display->setTextColor(workingIndex == 0 ? SSD1306_BLACK : SSD1306_WHITE,
+                          workingIndex == 0 ? SSD1306_WHITE : SSD1306_BLACK);
     display->printf("%02d", feedingTimes[0]);
 
     display->setTextColor(SSD1306_WHITE, SSD1306_BLACK);
     display->print(":");
 
-    display->setTextColor(
-        feedingTimesIndex == 1 ? SSD1306_BLACK : SSD1306_WHITE,
-        feedingTimesIndex == 1 ? SSD1306_WHITE : SSD1306_BLACK);
+    display->setTextColor(workingIndex == 1 ? SSD1306_BLACK : SSD1306_WHITE,
+                          workingIndex == 1 ? SSD1306_WHITE : SSD1306_BLACK);
     display->printf("%02d", feedingTimes[1]);
+
+    // Print second time
+    display->setTextColor(SSD1306_WHITE, SSD1306_BLACK);
+    display->setCursor(0, 24);
+    display->print("2: ");
+
+    display->setTextColor(workingIndex == 2 ? SSD1306_BLACK : SSD1306_WHITE,
+                          workingIndex == 2 ? SSD1306_WHITE : SSD1306_BLACK);
+    display->printf("%02d", feedingTimes[2]);
+
+    display->setTextColor(SSD1306_WHITE, SSD1306_BLACK);
+    display->print(":");
+
+    display->setTextColor(workingIndex == 3 ? SSD1306_BLACK : SSD1306_WHITE,
+                          workingIndex == 3 ? SSD1306_WHITE : SSD1306_BLACK);
+    display->printf("%02d", feedingTimes[3]);
 
     display->display();
 }
 
-void SetTimeView::drawStep2(Adafruit_SSD1306* display, RTC_DS3231* clock) {}
-
 void SetTimeView::handleInputsDefault() {
-    int buttonPressed = digitalRead(BUTTON_PIN) == LOW;
-    if (buttonPressed) {
-        Serial.println("Button Pressed");
+    int* feedingTimes = fishFeeder->getFeedingTimes();
 
-        // Reset the time
-        feedingTimes[0], feedingTimes[1] = 0;
-        step = 1;
-    }
-}
-void SetTimeView::handleInputsStep1() {
     // Check if the rotary encoder switch was pressed
     int swPressed = digitalRead(ROTARY_SW_PIN) == LOW;
 
     if (swPressed) {
-        if (feedingTimesIndex >= 1) {
-            // TODO: Set the time
+        if (workingIndex >= 3) {
             Serial.println("Finished adding time");
+            // Save pointer to current view to clear memory
+            View* previousView = gotoView;
+
+            // Go back to home view
+            HomeView* homeView = new HomeView(fishFeeder, true);
+            gotoView = homeView;
+
+            // Clear memory of previous view
+            delete previousView;
         } else {
-            feedingTimesIndex += 1;
+            workingIndex += 1;
         }
-        delay(500);
+        shouldPause = true;
     }
 
     // Check the rotary encoder
@@ -132,14 +127,14 @@ void SetTimeView::handleInputsStep1() {
         fishFeeder->getRotaryEncoderNewPos()) {
         // Can only getDirection() once per cycle
         int direction = (int)(rotaryEncoder->getDirection());
-        Serial.printf("dir: %d\n", direction);
         fishFeeder->setRotaryEncoderPos(fishFeeder->getRotaryEncoderNewPos());
 
-        int newTotal = feedingTimes[feedingTimesIndex] + direction;
-        feedingTimes[feedingTimesIndex] = newTotal > 0 ? newTotal : 0;
+        int clampUpperLimit = workingIndex % 2 == 0 ? 23 : 59;
+
+        int newTotal = std::clamp(feedingTimes[workingIndex] + direction, 0,
+                                  clampUpperLimit);
+        feedingTimes[workingIndex] = newTotal;
     }
 }
-void SetTimeView::handleInputsStep2() {}
 
-void SetTimeView::runStep1() {}
-void SetTimeView::runStep2() {}
+void SetTimeView::runDefault() {}

@@ -7,9 +7,10 @@
 
 class HomeView : public View {
    public:
-    HomeView(FishFeeder* fishFeederPtr);
+    HomeView(FishFeeder* fishFeederPtr, bool shouldPause = false);
     void run();
     void handleInputs();
     void draw();
+    void checkTime();
 };
 #endif

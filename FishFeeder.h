@@ -19,8 +19,8 @@ class FishFeeder {
     RotaryEncoder* rotaryEncoder;
     int rotaryEncoderPos;
     int rotaryEncoderNewPos;
-
-    // uint32_t* feedingTimes;
+    int* feedingTimes;
+    uint32_t lastFeedingTime;
 
     bool isDisplayOn;
 
@@ -41,6 +41,9 @@ class FishFeeder {
     void setRotaryEncoderNewPos(int pos);
     int getRotaryEncoderPos();
     int getRotaryEncoderNewPos();
+    uint32_t getLastFeedingTime();
+    void setLastFeedingTime(uint32_t unixtime);
+    int* getFeedingTimes();
 };
 
 #endif
