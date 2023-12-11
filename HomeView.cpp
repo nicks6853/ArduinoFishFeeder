@@ -3,10 +3,29 @@
 #include "FishFeeder.h"
 
 HomeView::HomeView(FishFeeder* fishFeederPtr, bool shouldPause)
-    : View(fishFeederPtr, shouldPause) {}
+    : View(fishFeederPtr, shouldPause) {
+    // Set the lastInput to the time that the view was created
+    lastInput = fishFeeder->getClock()->now().unixtime();
+}
 
 void HomeView::run() {
-    draw();
+    bool isDisplayOn = fishFeeder->getIsDisplayOn();
+    bool recentInput =
+        fishFeeder->getClock()->now().unixtime() - lastInput <= SCREEN_TIMEOUT;
+
+    if (!isDisplayOn && recentInput) {
+        Serial.println("Turning display on");
+        fishFeeder->displayOn();
+        isDisplayOn = true;
+    } else if (isDisplayOn && !recentInput) {
+        Serial.println("Turning display off");
+        fishFeeder->displayOff();
+        isDisplayOn = false;
+    }
+
+    if (isDisplayOn) {
+        draw();
+    }
 
     if (shouldPause) {
         delay(250);
@@ -20,9 +39,21 @@ void HomeView::run() {
 void HomeView::handleInputs() {
     int buttonPressed = digitalRead(ROTARY_SW_PIN) == LOW;
     if (buttonPressed) {
-        // Go to set time view
-        SetTimeView* setTimeView = new SetTimeView(fishFeeder, true);
-        gotoView = setTimeView;
+        /**
+         * Only go to set time view if there is a recent input because
+         * otherwise, the input should just turn on the display
+         */
+        if (fishFeeder->getClock()->now().unixtime() - lastInput >
+            SCREEN_TIMEOUT) {
+            // Update lastInput
+            lastInput = fishFeeder->getClock()->now().unixtime();
+            Serial.printf("Last Input Updated: %d", lastInput);
+            shouldPause = true;
+        } else {
+            // Go to set time view
+            SetTimeView* setTimeView = new SetTimeView(fishFeeder, true);
+            gotoView = setTimeView;
+        }
     }
 }
 
@@ -50,6 +81,7 @@ void HomeView::draw() {
     display->printf("%02d:%02d", feedingTimes[2], feedingTimes[3]);
 
     if (timeSinceLastFeed > 0 && timeSinceLastFeed < 5) {
+        fishFeeder->displayOn();
         display->setCursor(48, 24);
         display->setTextColor(SSD1306_WHITE, SSD1306_BLACK);
         display->print("Feeding...");

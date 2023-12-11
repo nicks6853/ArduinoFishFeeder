@@ -35,6 +35,8 @@ void FishFeeder::displayOn() {
     isDisplayOn = true;
 }
 
+bool FishFeeder::getIsDisplayOn() { return isDisplayOn; }
+
 void FishFeeder::clearView() {
     if (view != NULL) {
         delete view;
@@ -80,3 +82,52 @@ uint32_t FishFeeder::getLastFeedingTime() { return lastFeedingTime; }
 void FishFeeder::setLastFeedingTime(uint32_t unixtime) {
     lastFeedingTime = unixtime;
 };
+
+void FishFeeder::refreshTime() {
+    const char* timeApiUrl =
+        "http://worldtimeapi.org/api/timezone/America/Moncton";
+
+    const char ssid[] = SSID;
+    const char password[] = PASSWORD;
+
+    // BEGIN Initialize WiFi
+    WiFi.begin(ssid, password);
+    Serial.println("Connecting");
+    while (WiFi.status() != WL_CONNECTED) {
+        delay(500);
+        Serial.print(".");
+    }
+    Serial.println("");
+    Serial.print("Connected to WiFi network with IP Address: ");
+    Serial.println(WiFi.localIP());
+    // END Initialize WiFi
+
+    // Set the time for the clock
+    WiFiClient client;
+    HTTPClient http;
+
+    http.begin(client, timeApiUrl);
+
+    int httpResponseCode = http.GET();
+
+    if (httpResponseCode > 0) {
+        Serial.print("HTTP Response code: ");
+        Serial.println(httpResponseCode);
+        String payload = http.getString();
+        JSONVar json = JSON.parse(payload);
+
+        int unixtime = (int)json["unixtime"];
+        int rawOffset = (int)json["raw_offset"];
+
+        Serial.print("Unix time: ");
+        Serial.println(unixtime + rawOffset);
+        DateTime dt = DateTime(unixtime + rawOffset);
+        clock.adjust(dt);
+    } else {
+        Serial.print("Error code: ");
+        Serial.println(httpResponseCode);
+    }
+    // Free resources
+    http.end();
+    WiFi.disconnect();
+}

@@ -4,10 +4,14 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Arduino.h>
+#include <Arduino_JSON.h>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
 #include <RTClib.h>
 #include <RotaryEncoder.h>
 
 #include "Definitions.h"
+#include "Secrets.h"
 #include "View.h"
 #include "WelcomeView.h"
 
@@ -29,6 +33,7 @@ class FishFeeder {
     void begin();
     void displayOff();
     void displayOn();
+    bool getIsDisplayOn();
     Adafruit_SSD1306* getDisplay();
     RTC_DS3231* getClock();
     void run();
@@ -44,6 +49,7 @@ class FishFeeder {
     uint32_t getLastFeedingTime();
     void setLastFeedingTime(uint32_t unixtime);
     int* getFeedingTimes();
+    void refreshTime();
 };
 
 #endif

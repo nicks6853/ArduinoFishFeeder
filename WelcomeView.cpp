@@ -14,7 +14,8 @@ void WelcomeView::run() {
     }
 
     handleInputs();  // Nothing to do here
-    delay(2000);
+
+    fishFeeder->refreshTime();  // Refresh the time using the internet!
 
     // Continue to home view
     HomeView* homeView = new HomeView(fishFeeder);
@@ -83,5 +84,7 @@ void WelcomeView::draw() {
     display->print("FISH");
     display->setCursor(64, 16);
     display->print("FEEDER");
+    display->setCursor(64, 24);
+    display->print("Loading...");
     display->display();
 }

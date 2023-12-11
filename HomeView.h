@@ -6,6 +6,9 @@
 #include "View.h"
 
 class HomeView : public View {
+   private:
+    uint32_t lastInput;
+
    public:
     HomeView(FishFeeder* fishFeederPtr, bool shouldPause = false);
     void run();
