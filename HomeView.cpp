@@ -6,6 +6,7 @@ HomeView::HomeView(FishFeeder* fishFeederPtr, bool shouldPause)
     : View(fishFeederPtr, shouldPause) {
     // Set the lastInput to the time that the view was created
     lastInput = fishFeeder->getClock()->now().unixtime();
+    servo.attach(SERVO_PIN);
 }
 
 void HomeView::run() {
@@ -13,23 +14,36 @@ void HomeView::run() {
     bool recentInput =
         fishFeeder->getClock()->now().unixtime() - lastInput <= SCREEN_TIMEOUT;
 
+    RTC_DS3231* clock = fishFeeder->getClock();
+    DateTime now = clock->now();
+    uint32_t currentUnixTime = now.unixtime();
+    int* feedingTimes = fishFeeder->getFeedingTimes();
+    int lastFeedingTime = fishFeeder->getLastFeedingTime();
+    int timeSinceLastFeed = currentUnixTime - lastFeedingTime;
+    bool feeding = timeSinceLastFeed > 0 && timeSinceLastFeed < 5;
+
     if (!isDisplayOn && recentInput) {
         Serial.println("Turning display on");
         fishFeeder->displayOn();
         isDisplayOn = true;
-    } else if (isDisplayOn && !recentInput) {
+    } else if (isDisplayOn && !recentInput && !feeding) {
         Serial.println("Turning display off");
         fishFeeder->displayOff();
         isDisplayOn = false;
     }
 
-    if (isDisplayOn) {
-        draw();
-    }
+    draw();
 
     if (shouldPause) {
         delay(250);
         shouldPause = false;
+    }
+
+    // Feed if we are currently requiring feeding
+    if (feeding) {
+        servo.write(135);
+    } else {
+        servo.write(90);
     }
 
     handleInputs();
@@ -102,10 +116,7 @@ void HomeView::checkTime() {
 
     int* feedingTimes = fishFeeder->getFeedingTimes();
 
-    Serial.println(DateTime(lastFeedingTime).timestamp());
-
     if (lastFeedingTime == UINT32_MAX || timeSinceLastFeed > 60) {
-        Serial.println("Checking time");
         if ((hour == feedingTimes[0] && minute == feedingTimes[1]) ||
             (hour == feedingTimes[2] && minute == feedingTimes[3])) {
             fishFeeder->setLastFeedingTime(currentUnixTime / 60 * 60);
