@@ -131,7 +131,7 @@ void SetTimeView::handleInputsDefault() {
 
         int clampUpperLimit = workingIndex % 2 == 0 ? 23 : 59;
 
-        int newTotal = std::clamp(feedingTimes[workingIndex] + direction, 0,
+        int newTotal = std::clamp(feedingTimes[workingIndex] - direction, 0,
                                   clampUpperLimit);
         feedingTimes[workingIndex] = newTotal;
     }
