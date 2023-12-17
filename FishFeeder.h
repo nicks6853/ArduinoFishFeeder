@@ -16,6 +16,10 @@
 #include "WelcomeView.h"
 
 class FishFeeder {
+   public:
+    const char* fishFeederApiUrl =
+        "https://ih1opc5t90.execute-api.ca-central-1.amazonaws.com/dev";
+
    private:
     Adafruit_SSD1306 display = Adafruit_SSD1306(SCREEN_WIDTH, SCREEN_HEIGHT);
     RTC_DS3231 clock;

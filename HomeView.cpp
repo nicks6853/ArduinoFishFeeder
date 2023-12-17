@@ -120,6 +120,51 @@ void HomeView::checkTime() {
         if ((hour == feedingTimes[0] && minute == feedingTimes[1]) ||
             (hour == feedingTimes[2] && minute == feedingTimes[3])) {
             fishFeeder->setLastFeedingTime(currentUnixTime / 60 * 60);
+            Serial.println("Sending data to API");
+            Serial.println("{\"feeding\": \"" + now.timestamp() + "\"}");
+
+            const char ssid[] = SSID;
+            const char password[] = PASSWORD;
+
+            // BEGIN Initialize WiFi
+            WiFi.begin(ssid, password);
+            Serial.println("Connecting");
+            while (WiFi.status() != WL_CONNECTED) {
+                delay(500);
+                Serial.print(".");
+            }
+            Serial.println("");
+            Serial.print("Connected to WiFi network with IP Address: ");
+            Serial.println(WiFi.localIP());
+            // END Initialize WiFi
+
+            // Send data to API
+            WiFiClient client;
+            HTTPClient http;
+
+            char* feedsUrl = new char[strlen(fishFeeder->fishFeederApiUrl) +
+                                      strlen("/feeds") + 1];
+
+            strcpy(feedsUrl, fishFeeder->fishFeederApiUrl);
+            strcat(feedsUrl, "/feeds");
+
+            http.begin(client, feedsUrl);
+            http.addHeader("Content-Type", "application/json");
+
+            int httpResponseCode =
+                http.POST("{\"feeding\": \"" + now.timestamp() + "\"}");
+
+            if (httpResponseCode > 0) {
+                Serial.print("HTTP Response code: ");
+                Serial.println(httpResponseCode);
+            } else {
+                Serial.print("Error code: ");
+                Serial.println(httpResponseCode);
+            }
+
+            delete feedsUrl;
+            http.end();
+            WiFi.disconnect();
         }
     }
 }

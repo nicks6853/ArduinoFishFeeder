@@ -1,6 +1,7 @@
 #ifndef HOME_VIEW_H
 #define HOME_VIEW_H
 
+#include <Arduino_JSON.h>
 #include <Servo.h>
 
 #include "Definitions.h"
